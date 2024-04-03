@@ -1,5 +1,9 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { AUTH_USER } from "../Redux/todo_redux/action";
+import { useToast } from "@chakra-ui/react";
+import { Navigate } from "react-router-dom";
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -7,6 +11,10 @@ function Login() {
     password: "",
   });
 
+  const toast = useToast();
+  const current_user_state = useSelector((state) => state.todo.auth_user);
+  const dispatch = useDispatch();
+  const [auth, setAuth] = useState(current_user_state);
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevFormData) => ({
@@ -21,7 +29,21 @@ function Login() {
         email: formData.email,
         password: formData.password,
       });
-      console.log(response);
+      if (response.data.token) {
+        setAuth(true);
+        dispatch({ type: AUTH_USER, auth_user: true });
+        setFormData({
+          email: "",
+          password: "",
+        });
+        toast({
+          title: "Account created.",
+          description: "Login successfully",
+          status: "success",
+          duration: 4000,
+          isClosable: true,
+        });
+      }
     } catch (error) {
       console.log(error);
     }
@@ -31,6 +53,10 @@ function Login() {
     e.preventDefault();
     loginViaReqres();
   };
+
+  if (auth) {
+    return <Navigate to="/" />;
+  }
 
   return (
     <div>

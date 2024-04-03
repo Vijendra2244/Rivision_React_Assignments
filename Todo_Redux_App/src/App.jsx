@@ -19,8 +19,8 @@ function App() {
         <Link to="/">Home</Link>
         <Link to="/todo">Todo</Link>
         <Link to="/login">Login </Link>
+        <Theme />
       </Box>
-      <Theme />
       <AllRoutes />
     </>
   );

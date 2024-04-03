@@ -3,6 +3,7 @@ import Home from "../Pages/Home";
 import Login from "../Pages/Login";
 import { Routes, Route } from "react-router-dom";
 import Todo from "../Pages/Todo";
+import Theme from "../components/Theme";
 
 function AllRoutes() {
   return (
