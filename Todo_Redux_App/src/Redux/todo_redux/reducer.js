@@ -1,4 +1,4 @@
-import { ADD_TODO, AUTH_USER } from "./action";
+import { ADD_TODO, AUTH_USER, UPDATE_TODO_STATUS } from "./action";
 
 const initial_state = {
   auth_user: false,
@@ -18,6 +18,13 @@ export const todoReducer = (prevState = initial_state, action) => {
       return {
         ...prevState,
         todo: [...prevState.todo, action.payload],
+      };
+    case UPDATE_TODO_STATUS:
+      return {
+        ...prevState,
+        todo: prevState.todo.map((todo) =>
+          todo.id === action.payload ? { ...todo, status: !todo.status } : todo
+        ),
       };
     default:
       return prevState;
