@@ -1,16 +1,7 @@
 import { ADD_TODO, DELETE_TODO, UPDATE_TODO_STATUS } from "./action";
 const inital_state = {
   todo: [
-    {
-      id: 1,
-      title: "Learn HTML",
-      status: false,
-    },
-    {
-      id: 2,
-      title: "Learn CSS",
-      status: false,
-    },
+   
   ],
 };
 
