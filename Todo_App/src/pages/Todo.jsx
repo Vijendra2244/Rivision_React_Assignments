@@ -2,16 +2,19 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import {
-  ADD_TODO,
-  DELETE_TODO,
-  UPDATE_TODO_STATUS,
-} from "../redux/todo_redux/action";
+  addTodo,
+  deleteTodo,
+  updateTodoStatus,
+} from "../redux/todo_redux/actionItem";
 import { useToast } from "@chakra-ui/react";
-import TodoItem from "../components/TodoItem";
+
+import "../index.css";
 
 function Todo() {
   const [input, setInput] = useState("");
-  const [todos, setTodos] = useState([]); 
+  const todo = useSelector((state) => state.todo.todo);
+  const current_user_state = useSelector((s) => s.auth.auth_user);
+  const [todos, setTodos] = useState(todo);
   const dispatch = useDispatch();
   const toast = useToast();
 
@@ -19,34 +22,37 @@ function Todo() {
     setInput(e.target.value);
   };
 
+  useEffect(() => {
+    setTodos(todo);
+  }, [todo]);
+
+  useEffect(() => {
+    getData();
+  }, []);
+
   const getData = async () => {
     try {
-      const res = await axios("http://localhost:3000/todo");
+      const res = await axios.get("http://localhost:3000/todo");
       setTodos(res.data);
-
     } catch (error) {
       console.log(error);
     }
   };
 
-  useEffect(() => {
-    getData();
-  }, []); 
   const handleTodoStatus = async (id, status) => {
     try {
-      const newStatus = !status;
-
-      await axios.patch(`http://localhost:3000/todo/${id}`, {
-        status: newStatus,
-      });
-
-  
-      setTodos((prevTodos) =>
-        prevTodos.map((todo) =>
-          todo.id === id ? { ...todo, status: newStatus } : todo
-        )
-      );
-      dispatch(updat)
+      if (!current_user_state) {
+        toast({
+          title: "Login",
+          description: "You need to login first !",
+          status: "warning",
+          duration: 4000,
+          isClosable: true,
+        });
+        return;
+      }
+      await dispatch(updateTodoStatus(id, status));
+      getData();
     } catch (error) {
       console.log(error);
     }
@@ -54,10 +60,19 @@ function Todo() {
 
   const handleTodoDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:3000/todo/${id}`);
+      if (!current_user_state) {
+        toast({
+          title: "Login",
+          description: "You need to login first !",
+          status: "warning",
+          duration: 4000,
+          isClosable: true,
+        });
+        return;
+      }
 
-     
-      setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
+      await dispatch(deleteTodo(id));
+      getData();
     } catch (error) {
       console.log(error);
     }
@@ -65,15 +80,24 @@ function Todo() {
 
   const handleAddTodo = async () => {
     try {
+      if (!current_user_state) {
+        toast({
+          title: "Login",
+          description: "You need to login first !",
+          status: "warning",
+          duration: 4000,
+          isClosable: true,
+        });
+        return;
+      }
       const newTodo = {
-        id: Date.now(),
         title: input,
         status: false,
       };
-      const res = await axios.post("http://localhost:3000/todo", newTodo);
 
-      setTodos((prevTodos) => [...prevTodos, newTodo]);
-
+      await dispatch(addTodo(newTodo));
+      setInput("");
+      getData();
       toast({
         title: "Add todo",
         description: "Todo added successfully",
@@ -81,7 +105,6 @@ function Todo() {
         duration: 4000,
         isClosable: true,
       });
-      setInput("");
     } catch (error) {
       console.log(error);
     }
@@ -89,7 +112,7 @@ function Todo() {
 
   return (
     <>
-      <div>
+      <div className="todo">
         <input
           type="text"
           placeholder="Enter todo..."
@@ -99,14 +122,13 @@ function Todo() {
         <button onClick={handleAddTodo}>ADD</button>
       </div>
       {todos.map((item) => (
-        <TodoItem
-          key={item.id}
-          id={item.id}
-          status={item.status}
-          title={item.title}
-          handleTodoStatus={handleTodoStatus}
-          handleTodoDelete={handleTodoDelete}
-        />
+        <p className="items" key={item.id}>
+          {item.title} - {item.status ? "Completed" : "Pending"}{" "}
+          <button onClick={() => handleTodoStatus(item.id, item.status)}>
+            Toggle
+          </button>{" "}
+          <button onClick={() => handleTodoDelete(item.id)}>Delete</button>{" "}
+        </p>
       ))}
     </>
   );

@@ -1,9 +1,14 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { useSelector, useDispatch } from "react-redux";
 import { useToast } from "@chakra-ui/react";
-import { Navigate } from "react-router-dom";
+import { user_auth_state } from "../redux/auth_redux/actionItem";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
+  const current_user_state = useSelector((s) => s.auth.auth_user);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -26,7 +31,7 @@ function Login() {
         password: formData.password,
       });
       if (response.data.token) {
-        console.log(response.data.token);
+        dispatch(user_auth_state(true));
         setFormData({
           email: "",
           password: "",
@@ -38,6 +43,7 @@ function Login() {
           duration: 4000,
           isClosable: true,
         });
+        navigate("/");
       }
     } catch (error) {
       console.log(error);
